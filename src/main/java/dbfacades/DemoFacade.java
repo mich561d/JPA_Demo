@@ -14,58 +14,89 @@ Simple Facade demo for this start-up project
   - Delete the three public methods below, and replace with your own Facade Logic 
   - Delete all content in the main method
 
-*/
+ */
 public class DemoFacade {
 
-  EntityManagerFactory emf;
+    EntityManagerFactory emf;
 
-  public DemoFacade(EntityManagerFactory emf) {
-    this.emf = emf;
-  }
-
-  public Car addCar(Car car){
-    EntityManager em = emf.createEntityManager();
-    try{
-      em.getTransaction().begin();
-      em.persist(car);
-      em.getTransaction().commit();
-      return car;
-    }finally{
-      em.close();
-    }
-  }
-  
-  public List<Car> getAllCars() {
-    EntityManager em = emf.createEntityManager();
-    try {
-      return (List<Car>) em.createQuery("select m from Car m").getResultList();
-    } finally {
-      em.close();
-    }
-  }
-  public long countCars() {
-    EntityManager em = emf.createEntityManager();
-    try {
-      return (Long) em.createQuery("select Count(m) from Car m").getSingleResult();
-    } finally {
-      em.close();
+    public DemoFacade(EntityManagerFactory emf) {
+        this.emf = emf;
     }
 
-  }
+    public Car addCar(Car car) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.persist(car);
+            em.getTransaction().commit();
+            return car;
+        } finally {
+            em.close();
+        }
+    }
 
-  /*
+    public List<Car> getAllCars() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return (List<Car>) em.createQuery("select m from Car m").getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public long countCars() {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return (Long) em.createQuery("select Count(m) from Car m").getSingleResult();
+        } finally {
+            em.close();
+        }
+
+    }
+
+    /*
   This will only work when your have added a persistence.xml file in the folder: 
      src/main/resources/META-INF
   You can use the file: persistence_TEMPLATE.xml (in this folder) as your template
-  */
-  public static void main(String[] args) {
-    EntityManagerFactory emf = Persistence.createEntityManagerFactory("pu");
-    DemoFacade df = new DemoFacade(emf);
-    df.addCar(new Car("Volvo"));
-    df.addCar(new Car("WW"));
-    df.addCar(new Car("Jaguar"));
-    long numbOfCars = df.countCars();
-    System.out.println("Number of cars: "+numbOfCars);
-  }
+     */
+    public static void main(String[] args) {
+        EntityManagerFactory emf = Persistence.createEntityManagerFactory("pu");
+        DemoFacade df = new DemoFacade(emf);
+        df.addCar(new Car("Volvo"));
+        df.addCar(new Car("WW"));
+        df.addCar(new Car("Jaguar"));
+        long numbOfCars = df.countCars();
+        System.out.println("Number of cars: " + numbOfCars);
+    }
+
+    List<Car> getCarsByMake(String make) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return (List<Car>) em.createQuery("select c from Car c where c.make = :make").setParameter("make", make).getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    Car getCarByID(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            return (Car) em.createQuery("select c from Car c where c.id = :carID").setParameter("carID", id).getSingleResult();
+        } finally {
+            em.close();
+        }
+    }
+
+    void deleteCarByID(int id) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            Car car = em.find(Car.class, id);
+            em.remove(car);
+            em.getTransaction().commit();
+        } finally {
+            em.close();
+        }
+    }
 
 }
